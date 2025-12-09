@@ -1,88 +1,157 @@
 *{
-    margin:0;
-    padding:0;
-    font-family: "Comic Sans MS", sans-serif;
+  margin:0; padding:0; font-family: "Comic Sans MS", sans-serif;
 }
+
 main{
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    background: url("../img/bambuk_bg.jpg") center no-repeat;
-    background-size: 100% 100%;
+  width: 100vw; height: 100vh; overflow: hidden;
+  background: url("../img/bambuk_bg.jpg") center no-repeat;
+  background-size: 100% 100%;
 }
-@keyframes rotate {
-    to {
-        transform: rotate(360deg);
-    }
-}
-.panel{
-    width: 100%;
-    height: 100%;
-}
-.left{
-    width: 40%;
-    height: 100%;
-}
+
+/* Базовые панели/экраны */
+.panel{ width: 100%; height: 100%; }
+.left{ width: 40%; height: 100%; }
 .main{
-    background: #ffe8ba;
-    padding: 5vh;
-    border: 3px solid #000;
-    border-radius: 2em;
+  background: #ffe8ba; padding: 5vh; border: 3px solid #000; border-radius: 2em;
 }
+
+/* Переходы между экранами */
+.screen { opacity: 0; transition: opacity .35s ease; }
+.screen-active { opacity: 1; }
+.card-raise { animation: cardRaise .45s ease; }
+@keyframes cardRaise {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Оверлей паузы */
 .pause {
-    position: fixed;
-    top: 0;
-    left: 0;
-    display: none; /* Скрыто через display */
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1000;
-    background-color: rgba(0, 0, 0, .8);
-    color: white;
+  position: fixed; top: 0; left: 0;
+  display: none;
+  justify-content: center; align-items: center; flex-direction: column;
+  width: 100vw; height: 100vh; z-index: 1000;
+  background-color: rgba(0, 0, 0, .8); color: white;
 }
-.changeName{
-    height: 15vh;
-}
-#game{
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    position: relative;
-}
+
+/* Игровая зона */
+#game{ width: 100vw; height: 100vh; overflow: hidden; position: relative; }
 .info{
-    position: fixed;
-    width: 100%;
-    height: 8vh;
-    z-index: 100;
-    font-size: 1.3em;
-    background: rgba(255, 255, 255, .9);
+  position: fixed; width: 100%; height: 8vh; z-index: 100; font-size: 1.3em;
+  background: rgba(255, 255, 255, .9);
 }
-.elements  {
-    width: 100%;
-    height: 100%;
+.elements { width: 100%; height: 100%; position: relative; }
+.element{ position: absolute; will-change: transform, left, top; }
+
+/* Спрайты */
+.player{ background: url("../img/player.png") center no-repeat; background-size: contain; }
+.apple{ background: url("../img/apple.png") center no-repeat; background-size: contain; animation: rotate infinite .6s linear; }
+.orange{ background: url("../img/orange.png") center no-repeat; background-size: contain; animation: rotate infinite .7s linear; }
+.banana{ background: url("../img/banana.png") center no-repeat; background-size: contain; animation: rotate infinite .8s linear; }
+
+/* Вращение фруктов */
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+/* Пауза: стоп вращения */
+.elements.paused .apple,
+.elements.paused .orange,
+.elements.paused .banana {
+  animation-play-state: paused;
 }
-.element{
-    position: absolute;
+
+/* Анимации: таймер, HP, очки, столкновения */
+.timer-indicator.tick { animation: timerPulse .25s ease; }
+@keyframes timerPulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.09); }
+  100% { transform: scale(1); }
 }
-.player{
-    background: url("../img/player.png") center no-repeat;
-    background-size: contain;
+
+.hp-indicator.flash { animation: hpFlash .5s ease; }
+@keyframes hpFlash {
+  0% { color: #c00; }
+  50% { color: #900; transform: scale(1.07); }
+  100% { color: #c00; }
 }
-.apple{
-    background: url("../img/apple.png") center no-repeat;
-    background-size: contain;
-    animation: rotate infinite .6s linear;
+
+.points-indicator.pop { animation: pointsPop .3s ease; }
+@keyframes pointsPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
 }
-.orange{
-    background: url("../img/orange.png") center no-repeat;
-    background-size: contain;
-    animation: rotate infinite .7s linear;
+
+/* Анимации фруктов при событиях */
+.element.catch { animation: catchPop .25s ease forwards; }
+@keyframes catchPop {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.3); opacity: 0; }
 }
-.banana{
-    background: url("../img/banana.png") center no-repeat;
-    background-size: contain;
-    animation: rotate infinite .8s linear;
+
+.element.miss { animation: missDrop .2s ease forwards; }
+@keyframes missDrop {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(10px) scale(0.8); opacity: 0; }
+}
+
+/* Анимация способности: индикатор */
+.skill-indicator.ready { color: #2a7; }
+.skill-indicator.active { color: #27a; animation: skillPulse .5s ease infinite; }
+.skill-indicator.cooldown { color: #a72; }
+@keyframes skillPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* Небольшая тряска корзины при ловле */
+.player.shake { animation: playerShake .18s ease; }
+@keyframes playerShake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
+
+/* Подсветка нижней границы экрана при промахе */
+.elements.floor-flash::after {
+  content: "";
+  position: absolute; left: 0; bottom: 0; width: 100%; height: 8px;
+  background: rgba(200, 0, 0, .0);
+  pointer-events: none;
+  animation: floorFlash .25s ease;
+}
+@keyframes floorFlash {
+  0% { background: rgba(200, 0, 0, .4); }
+  100% { background: rgba(200, 0, 0, .0); }
+}
+
+/* Трекбар способности: виден только на откате, сделан меньше и короче */
+.skill-bar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 2vh;
+  width: 30vw;           /* короче */
+  max-width: 380px;
+  height: 8px;           /* меньше */
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid rgba(0,0,0,0.5);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 90;
+  display: none;         /* скрыт по умолчанию */
+}
+.skill-fill {
+  width: 0%;
+  height: 100%;
+  transition: width .1s linear;
+  background: linear-gradient(90deg, #2aa96b, #27a);
+}
+/* Цвета трекбара по состояниям */
+.skill-bar.ready { display: none; }
+.skill-bar.active { display: none; }
+.skill-bar.cooldown { display: block; }
+.skill-bar.cooldown .skill-fill {
+  background: linear-gradient(90deg, #a76a2a, #e6a55a);
 }
